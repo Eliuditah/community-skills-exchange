@@ -7,7 +7,7 @@ const User = require('../models/User');
 // Register
 router.post('/register', async (req, res) => {
   try {
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, phoneNumber } = req.body;
 
     // Validate input
     if (!name || !email || !password) {
@@ -30,6 +30,7 @@ router.post('/register', async (req, res) => {
       email: email.toLowerCase().trim(),
       password: hashedPassword,
       role: role || 'user',
+      phoneNumber: phoneNumber || ''
     });
 
     // Generate token
@@ -46,6 +47,7 @@ router.post('/register', async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phoneNumber: user.phoneNumber || '',
       token,
       message: 'Registration successful!'
     });
@@ -98,6 +100,7 @@ router.post('/login', async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      phoneNumber: user.phoneNumber || '',
       token,
       message: 'Login successful!'
     });
@@ -135,12 +138,60 @@ router.get('/me', async (req, res) => {
       role: user.role,
       bio: user.bio || '',
       location: user.location || {},
+      phoneNumber: user.phoneNumber || '',
       profilePicture: user.profilePicture || '',
       reputation: user.reputation || 0
     });
   } catch (error) {
     console.error('❌ Get user error:', error);
     res.status(401).json({ message: 'Not authorized' });
+  }
+});
+
+// Update user profile (protected)
+router.put('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update fields
+    const { name, bio, location, phoneNumber, profilePicture } = req.body;
+    
+    if (name) user.name = name.trim();
+    if (bio !== undefined) user.bio = bio;
+    if (location) user.location = location;
+    if (phoneNumber !== undefined) user.phoneNumber = phoneNumber;
+    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      bio: user.bio || '',
+      location: user.location || {},
+      phoneNumber: user.phoneNumber || '',
+      profilePicture: user.profilePicture || '',
+      reputation: user.reputation || 0,
+      message: 'Profile updated successfully!'
+    });
+  } catch (error) {
+    console.error('❌ Update profile error:', error);
+    res.status(500).json({ 
+      message: 'Failed to update profile: ' + error.message 
+    });
   }
 });
 

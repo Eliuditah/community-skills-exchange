@@ -91,6 +91,20 @@ const ExchangeButton = ({ skillOffered, skillRequested, onExchangeCreated }) => 
       // Show success message
       alert('✅ Exchange request sent successfully! The provider will be notified.');
       
+      // If the provider has a phone number, offer to contact them directly
+      if (result.provider?.phoneNumber) {
+        const contactViaWhatsApp = confirm(
+          'Exchange request sent! Would you like to contact the provider directly via WhatsApp?'
+        );
+        if (contactViaWhatsApp) {
+          const cleanNumber = result.provider.phoneNumber.replace(/[^0-9+]/g, '');
+          const message = encodeURIComponent(
+            `Hi! I've requested to exchange my ${userSkills.find(s => s._id === selectedSkill)?.name} skill for your ${skillRequested?.name} skill. Let me know if you're interested!`
+          );
+          window.open(`https://wa.me/${cleanNumber}?text=${message}`, '_blank');
+        }
+      }
+      
     } catch (error) {
       console.error('❌ Exchange request failed:', error);
       setError(error.message || 'Failed to send exchange request. Please try again.');

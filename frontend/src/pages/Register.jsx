@@ -13,6 +13,7 @@ const Register = () => {
     email: '',
     password: '',
     confirmPassword: '',
+    phoneNumber: '',
     role: 'user'
   });
   const [error, setError] = useState('');
@@ -100,6 +101,17 @@ const Register = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 required
+                sx={{ mb: 2 }}
+              />
+              <TextField
+                fullWidth
+                label="Phone Number (Optional)"
+                name="phoneNumber"
+                type="tel"
+                value={formData.phoneNumber}
+                onChange={handleChange}
+                placeholder="+1234567890"
+                helperText="Include country code for WhatsApp contact"
                 sx={{ mb: 2 }}
               />
               <TextField

@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { 
   Box, Card, CardContent, Typography, Avatar, Grid, 
   Chip, Button, Divider, CircularProgress, LinearProgress,
-  Paper
+  Paper, Dialog, DialogTitle, DialogContent, DialogActions,
+  TextField, MenuItem, Snackbar, Alert
 } from '@mui/material';
 import { 
   Person, Email, LocationOn, Star, Code, SwapHoriz, 
@@ -64,6 +65,15 @@ const Profile = () => {
     pendingExchanges: 0,
     rating: 0
   });
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editForm, setEditForm] = useState({
+    name: '',
+    bio: '',
+    phoneNumber: '',
+    city: '',
+    country: ''
+  });
+  const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
 
   useEffect(() => {
     if (authUser) {
@@ -71,6 +81,48 @@ const Profile = () => {
       fetchProfile();
     }
   }, [authUser]);
+
+  const handleEditDialogOpen = () => {
+    setEditForm({
+      name: user?.name || '',
+      bio: user?.bio || '',
+      phoneNumber: user?.phoneNumber || '',
+      city: user?.location?.city || '',
+      country: user?.location?.country || ''
+    });
+    setEditDialogOpen(true);
+  };
+
+  const handleEditDialogClose = () => {
+    setEditDialogOpen(false);
+  };
+
+  const handleProfileUpdate = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const updateData = {
+        name: editForm.name,
+        bio: editForm.bio,
+        phoneNumber: editForm.phoneNumber,
+        location: {
+          city: editForm.city,
+          country: editForm.country
+        }
+      };
+
+      const response = await axios.put('http://localhost:5000/api/auth/profile', updateData, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+
+      setUser(response.data);
+      localStorage.setItem('user', JSON.stringify(response.data));
+      setEditDialogOpen(false);
+      setSnackbar({ open: true, message: 'Profile updated successfully!', severity: 'success' });
+    } catch (error) {
+      console.error('Error updating profile:', error);
+      setSnackbar({ open: true, message: 'Failed to update profile', severity: 'error' });
+    }
+  };
 
   const fetchProfile = async () => {
     try {
@@ -103,6 +155,15 @@ const Profile = () => {
         completedExchanges: completed.length,
         pendingExchanges: pending.length,
         rating: completed.length > 0 ? 4.5 : 0 // Placeholder
+      });
+      
+      // Also update the edit form with the latest data
+      setEditForm({
+        name: response.data.name || '',
+        bio: response.data.bio || '',
+        phoneNumber: response.data.phoneNumber || '',
+        city: response.data.location?.city || '',
+        country: response.data.location?.country || ''
       });
     } catch (error) {
       console.error('Error fetching profile:', error);
@@ -204,6 +265,7 @@ const Profile = () => {
                 <Button 
                   variant="outlined" 
                   startIcon={<Edit />}
+                  onClick={handleEditDialogOpen}
                   sx={{ 
                     color: 'white', 
                     borderColor: 'rgba(255,255,255,0.3)',
@@ -214,7 +276,7 @@ const Profile = () => {
                 </Button>
                 
                 {/* 🌟 NEW: WhatsApp Button */}
-                <WhatsAppConnectButton phoneNumber={user?.phone} />
+                <WhatsAppConnectButton phoneNumber={user?.phoneNumber} />
                 
               </Grid>
             </Grid>
@@ -369,6 +431,80 @@ const Profile = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Edit Profile Dialog */}
+      <Dialog open={editDialogOpen} onClose={handleEditDialogClose} maxWidth="sm" fullWidth>
+        <DialogTitle>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Edit /> Edit Profile
+          </Box>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 2 }}>
+            <TextField
+              fullWidth
+              label="Full Name"
+              value={editForm.name}
+              onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Bio"
+              multiline
+              rows={3}
+              value={editForm.bio}
+              onChange={(e) => setEditForm({ ...editForm, bio: e.target.value })}
+              placeholder="Tell others about yourself..."
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Phone Number (Optional)"
+              type="tel"
+              value={editForm.phoneNumber}
+              onChange={(e) => setEditForm({ ...editForm, phoneNumber: e.target.value })}
+              placeholder="+1234567890"
+              helperText="Include country code for WhatsApp contact"
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="City"
+              value={editForm.city}
+              onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+              sx={{ mb: 2 }}
+            />
+            <TextField
+              fullWidth
+              label="Country"
+              value={editForm.country}
+              onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleEditDialogClose}>Cancel</Button>
+          <Button 
+            onClick={handleProfileUpdate} 
+            variant="contained"
+            sx={{ bgcolor: '#1a237e' }}
+          >
+            Save Changes
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity} onClose={() => setSnackbar({ ...snackbar, open: false })}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Layout>
   );
 };
