@@ -1,5 +1,5 @@
 import React from 'react';
-import { Box, Card, CardContent, Typography, Grid, LinearProgress, Tooltip } from '@mui/material';
+import { Box, Card, CardContent, Typography, Grid, Tooltip, Chip } from '@mui/material';
 import { EmojiEvents, Star, TrendingUp, Whatshot, School, People, Verified, Rocket } from '@mui/icons-material';
 
 const BadgeSystem = ({ user }) => {

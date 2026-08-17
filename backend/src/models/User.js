@@ -52,9 +52,19 @@ const UserSchema = new mongoose.Schema({
     type: Number,
     default: 0
   },
+  phone: {
+    type: String,
+    default: ''
+  },
   isVerified: {
     type: Boolean,
     default: false
+  },
+  resetPasswordToken: {
+    type: String
+  },
+  resetPasswordExpires: {
+    type: Date
   },
   lastActive: {
     type: Date,

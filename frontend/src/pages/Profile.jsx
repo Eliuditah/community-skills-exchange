@@ -72,22 +72,24 @@ const Profile = () => {
     }
   }, [authUser]);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
       
       // Fetch user profile
-      const response = await axios.get(`http://localhost:5000/api/auth/me`, {
+      const response = await axios.get(`${API_URL}/auth/me`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       // Fetch user skills
-      const skillsRes = await axios.get(`http://localhost:5000/api/skills/user/${authUser._id}`, {
+      const skillsRes = await axios.get(`${API_URL}/skills/user/${authUser._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       // Fetch user exchanges
-      const exchangesRes = await axios.get(`http://localhost:5000/api/exchanges/user`, {
+      const exchangesRes = await axios.get(`${API_URL}/exchanges/user`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

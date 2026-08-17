@@ -27,11 +27,12 @@ const SkillPortfolio = ({ userId }) => {
   const fetchPortfolio = async () => {
     try {
       const token = localStorage.getItem('token');
-      const skillsRes = await axios.get(`http://localhost:5000/api/skills/user/${userId}`, {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const skillsRes = await axios.get(`${API_URL}/skills/user/${userId}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      const exchangesRes = await axios.get('http://localhost:5000/api/exchanges/user', {
+      const exchangesRes = await axios.get(`${API_URL}/exchanges/user`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

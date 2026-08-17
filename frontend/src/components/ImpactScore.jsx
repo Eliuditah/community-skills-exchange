@@ -22,11 +22,12 @@ const ImpactScore = () => {
       const token = localStorage.getItem('token');
       const user = JSON.parse(localStorage.getItem('user') || '{}');
       
-      const exchangesRes = await axios.get('http://localhost:5000/api/exchanges/user', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const exchangesRes = await axios.get(`${API_URL}/exchanges/user`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
-      const skillsRes = await axios.get(`http://localhost:5000/api/skills/user/${user._id}`, {
+      const skillsRes = await axios.get(`${API_URL}/skills/user/${user._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
