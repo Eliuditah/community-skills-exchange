@@ -44,45 +44,48 @@ const createExchange = async (req, res) => {
     });
 
     // ==================================================
-    // 🌟 NEW: SEND EMAIL NOTIFICATION TO THE RECEIVER
+    // 🌟 SEND EMAIL NOTIFICATION TO THE RECEIVER (Optional)
     // ==================================================
-    try {
-      const receiver = await User.findById(requestedSkill.provider);
-      
-      if (receiver && receiver.email) {
-        // Configure Transporter (Ideally, use process.env.EMAIL_USER and process.env.EMAIL_PASS)
-        const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-                user: 'YOUR_EMAIL@gmail.com', // CHANGE THIS
-                pass: 'YOUR_APP_PASSWORD'     // CHANGE THIS
-            }
-        });
-
-        const mailOptions = {
-            from: `"SkillExchange" <YOUR_EMAIL@gmail.com>`, // CHANGE THIS
-            to: receiver.email,
-            subject: '💡 New Skill Exchange Request!',
-            html: `
-                <h3>You have a new exchange request!</h3>
-                <p><strong>Sender:</strong> ${req.user.name || 'A User'}</p>
-                <p><strong>Offering:</strong> ${offeredSkill.name}</p>
-                <p><strong>Requesting:</strong> ${requestedSkill.name}</p>
-                <p><strong>Message:</strong> ${message || 'No message provided'}</p>
-                <br>
-                <a href="http://localhost:3000/dashboard" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Request in Dashboard</a>
-            `
-        };
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const receiver = await User.findById(requestedSkill.provider);
         
-        // Send email in the background
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) console.error('Error sending email:', error);
-            else console.log('Email sent: ' + info.response);
-        });
+        if (receiver && receiver.email) {
+          const transporter = nodemailer.createTransport({
+              service: 'gmail',
+              auth: {
+                  user: process.env.EMAIL_USER,
+                  pass: process.env.EMAIL_PASS
+              }
+          });
+
+          const mailOptions = {
+              from: `"SkillExchange" <${process.env.EMAIL_USER}>`,
+              to: receiver.email,
+              subject: '💡 New Skill Exchange Request!',
+              html: `
+                  <h3>You have a new exchange request!</h3>
+                  <p><strong>Sender:</strong> ${req.user.name || 'A User'}</p>
+                  <p><strong>Offering:</strong> ${offeredSkill.name}</p>
+                  <p><strong>Requesting:</strong> ${requestedSkill.name}</p>
+                  <p><strong>Message:</strong> ${message || 'No message provided'}</p>
+                  <br>
+                  <a href="http://localhost:3000/dashboard" style="background-color: #2563eb; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">View Request in Dashboard</a>
+              `
+          };
+          
+          // Send email in the background
+          transporter.sendMail(mailOptions, (error, info) => {
+              if (error) console.error('Error sending email:', error);
+              else console.log('Email sent: ' + info.response);
+          });
+        }
+      } catch (emailError) {
+        // Log but don't stop exchange creation
+        console.error('Failed to send email:', emailError);
       }
-    } catch (emailError) {
-      // Log but don't stop exchange creation
-      console.error('Failed to send email:', emailError);
+    } else {
+      console.log('Email credentials not configured - skipping email notification');
     }
     // ==================================================
 
