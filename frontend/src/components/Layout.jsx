@@ -10,11 +10,45 @@ import {
   Explore, PostAdd, Home
 } from '@mui/icons-material';
 import NotificationBell from './NotificationBell';
+import { useAuth } from '../context/AuthContext';
 
 const Layout = ({ children }) => {
   const navigate = useNavigate();
+  const { user, logout, loading } = useAuth();
   const [anchorEl, setAnchorEl] = React.useState(null);
-  const user = JSON.parse(localStorage.getItem('user') || 'null');
+
+  // Don't render user-specific elements while loading
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <AppBar position="sticky" sx={{ backgroundColor: '#1a237e' }}>
+          <Toolbar>
+            <Typography 
+              variant="h6" 
+              component={Link} 
+              to="/" 
+              sx={{ 
+                flexGrow: 1, 
+                textDecoration: 'none', 
+                color: 'white',
+                fontWeight: 'bold',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                '&:hover': { opacity: 0.9 }
+              }}
+            >
+              <span style={{ fontSize: '1.5rem' }}>🤝</span>
+              SkillExchange
+            </Typography>
+          </Toolbar>
+        </AppBar>
+        <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <div>Loading...</div>
+        </Container>
+      </div>
+    );
+  }
 
   const handleMenu = (event) => {
     setAnchorEl(event.currentTarget);
@@ -25,8 +59,7 @@ const Layout = ({ children }) => {
   };
 
   const handleLogout = () => {
-    localStorage.removeItem('user');
-    localStorage.removeItem('token');
+    logout();
     navigate('/login');
     handleClose();
   };

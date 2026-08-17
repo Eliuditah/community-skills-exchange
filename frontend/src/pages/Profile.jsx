@@ -13,6 +13,7 @@ import axios from 'axios';
 import Layout from '../components/Layout';
 import BadgeSystem from '../components/BadgeSystem';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // WhatsApp Button Component to be used inside Profile
 const WhatsAppConnectButton = ({ phoneNumber }) => {
@@ -52,6 +53,7 @@ const WhatsAppConnectButton = ({ phoneNumber }) => {
 };
 
 const Profile = () => {
+  const { user: authUser, updateProfile } = useAuth();
   const [user, setUser] = useState(null);
   const [userSkills, setUserSkills] = useState([]);
   const [userExchanges, setUserExchanges] = useState([]);
@@ -64,13 +66,15 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    fetchProfile();
-  }, []);
+    if (authUser) {
+      setUser(authUser);
+      fetchProfile();
+    }
+  }, [authUser]);
 
   const fetchProfile = async () => {
     try {
       const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user') || '{}');
       
       // Fetch user profile
       const response = await axios.get(`http://localhost:5000/api/auth/me`, {
@@ -78,7 +82,7 @@ const Profile = () => {
       });
 
       // Fetch user skills
-      const skillsRes = await axios.get(`http://localhost:5000/api/skills/user/${userData._id}`, {
+      const skillsRes = await axios.get(`http://localhost:5000/api/skills/user/${authUser._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

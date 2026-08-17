@@ -14,9 +14,15 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const token = localStorage.getItem('token');
+    const savedUser = localStorage.getItem('user');
     if (token) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      loadUser();
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+        setLoading(false);
+      } else {
+        loadUser();
+      }
     } else {
       setLoading(false);
     }
@@ -25,10 +31,12 @@ export const AuthProvider = ({ children }) => {
   const loadUser = async () => {
     try {
       const res = await axios.get(`${API_URL}/auth/me`);
+      localStorage.setItem('user', JSON.stringify(res.data));
       setUser(res.data);
       setLoading(false);
     } catch (err) {
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
       delete axios.defaults.headers.common['Authorization'];
       setLoading(false);
     }
@@ -39,6 +47,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const res = await axios.post(`${API_URL}/auth/register`, userData);
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data));
       axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       setUser(res.data);
       return { success: true };
@@ -53,6 +62,7 @@ export const AuthProvider = ({ children }) => {
       setError(null);
       const res = await axios.post(`${API_URL}/auth/login`, { email, password });
       localStorage.setItem('token', res.data.token);
+      localStorage.setItem('user', JSON.stringify(res.data));
       axios.defaults.headers.common['Authorization'] = `Bearer ${res.data.token}`;
       setUser(res.data);
       return { success: true };
@@ -64,6 +74,7 @@ export const AuthProvider = ({ children }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
+    localStorage.removeItem('user');
     delete axios.defaults.headers.common['Authorization'];
     setUser(null);
   };
@@ -71,6 +82,7 @@ export const AuthProvider = ({ children }) => {
   const updateProfile = async (data) => {
     try {
       const res = await axios.put(`${API_URL}/auth/profile`, data);
+      localStorage.setItem('user', JSON.stringify(res.data));
       setUser(res.data);
       return { success: true };
     } catch (err) {

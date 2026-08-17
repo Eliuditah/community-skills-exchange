@@ -12,9 +12,11 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../components/Layout';
+import { useAuth } from '../context/AuthContext';
 
 const PostSkill = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     category: '',
@@ -76,9 +78,8 @@ const PostSkill = () => {
     try {
       // Get token and user data
       const token = localStorage.getItem('token');
-      const userData = JSON.parse(localStorage.getItem('user') || '{}');
       
-      if (!token) {
+      if (!token || !user) {
         setError('Please login first');
         setLoading(false);
         return;
