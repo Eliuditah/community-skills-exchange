@@ -1,0 +1,29 @@
+﻿@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.slick-dots li button:before {
+  color: white !important;
+  font-size: 12px !important;
+}
+
+.slick-dots li.slick-active button:before {
+  color: white !important;
+}
+
+.slick-prev:before,
+.slick-next:before {
+  color: white !important;
+  font-size: 24px !important;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+}
