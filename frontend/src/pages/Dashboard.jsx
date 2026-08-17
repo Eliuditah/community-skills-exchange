@@ -11,8 +11,10 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../components/Layout';
+import { useAuth } from '../context/AuthContext';
 
 const Dashboard = () => {
+  const { user } = useAuth();
   const [exchanges, setExchanges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [tabValue, setTabValue] = useState(0);
@@ -22,13 +24,12 @@ const Dashboard = () => {
   const [feedback, setFeedback] = useState('');
   const [rating, setRating] = useState(0);
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
-  const [currentUser, setCurrentUser] = useState(null);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
-    fetchExchanges();
-  }, []);
+    if (user) {
+      fetchExchanges();
+    }
+  }, [user]);
 
   const fetchExchanges = async () => {
     setLoading(true);
@@ -83,7 +84,7 @@ const Dashboard = () => {
   const handleSubmitFeedback = async () => {
     try {
       const token = localStorage.getItem('token');
-      const isRequester = selectedExchange.requester._id === currentUser?._id;
+      const isRequester = selectedExchange.requester._id === user?._id;
       
       const feedbackData = {
         rating: rating,
@@ -149,7 +150,7 @@ const Dashboard = () => {
   };
 
   const isProvider = (exchange) => {
-    return exchange.provider._id === currentUser?._id;
+    return exchange.provider._id === user?._id;
   };
 
   const canAct = (exchange, action) => {

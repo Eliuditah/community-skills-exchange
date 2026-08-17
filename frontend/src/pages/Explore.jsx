@@ -9,13 +9,14 @@ import {
 import { Search, Person, Close } from '@mui/icons-material';
 import axios from 'axios';
 import Layout from '../components/Layout';
+import { useAuth } from '../context/AuthContext';
 
 const Explore = () => {
+  const { user } = useAuth();
   const [skills, setSkills] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [filters, setFilters] = useState({ search: '', category: '', level: '' });
-  const [currentUser, setCurrentUser] = useState(null);
   const [userSkills, setUserSkills] = useState([]);
   
   // Exchange Modal States
@@ -26,13 +27,11 @@ const Explore = () => {
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    setCurrentUser(user);
     fetchSkills();
-    if (user._id) {
+    if (user && user._id) {
       fetchUserSkills(user._id);
     }
-  }, []);
+  }, [user]);
 
   const fetchSkills = async () => {
     setLoading(true);
@@ -99,7 +98,7 @@ const Explore = () => {
       return;
     }
 
-    if (currentUser && skill.provider?._id === currentUser._id) {
+    if (user && skill.provider?._id === user._id) {
       alert('You cannot request an exchange for your own skill');
       return;
     }
@@ -259,7 +258,7 @@ const Explore = () => {
       ) : (
         <Grid container spacing={3}>
           {filteredSkills.map((skill) => {
-            const isOwnSkill = currentUser && skill.provider?._id === currentUser._id;
+            const isOwnSkill = user && skill.provider?._id === user._id;
             
             return (
               <Grid item xs={12} sm={6} md={4} key={skill._id || Math.random()}>
@@ -373,7 +372,7 @@ const Explore = () => {
               {selectedSkill?.name}
             </Typography>
             <Typography variant="caption" color="textSecondary">
-              by {selectedSkill?.provider?.name || 'Unknown'}
+              by {selectedSkill?.provider?.name || user?.name || 'Unknown'}
             </Typography>
           </Box>
 
