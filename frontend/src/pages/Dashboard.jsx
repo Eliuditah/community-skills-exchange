@@ -12,6 +12,7 @@ import {
 import axios from 'axios';
 import Layout from '../components/Layout';
 import { useAuth } from '../context/AuthContext';
+import WhatsAppButton from '../components/WhatsAppButton';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -335,36 +336,66 @@ const Dashboard = () => {
                       )}
 
                       {exchange.status === 'accepted' && !isProvider(exchange) && (
-                        <Button 
-                          variant="contained" 
-                          color="primary"
-                          size="small"
-                          onClick={() => handleAction(exchange._id, 'complete')}
-                        >
-                          <CheckCircle sx={{ mr: 1 }} /> Mark Complete
-                        </Button>
-                      )}
-
-                      {exchange.status === 'completed' && (
-                        <Button 
-                          variant="outlined" 
-                          color="secondary"
-                          size="small"
-                          onClick={() => handleOpenDialog(exchange, 'feedback')}
-                        >
-                          <Star sx={{ mr: 1 }} /> Rate & Feedback
-                        </Button>
+                        <>
+                          <Button 
+                            variant="contained" 
+                            color="primary"
+                            size="small"
+                            onClick={() => handleAction(exchange._id, 'complete')}
+                          >
+                            <CheckCircle sx={{ mr: 1 }} /> Mark Complete
+                          </Button>
+                          {exchange.provider?.phoneNumber && (
+                            <WhatsAppButton 
+                              phoneNumber={exchange.provider.phoneNumber}
+                              message={`Hi! I'd like to discuss our skill exchange. I'm interested in learning ${exchange.skillRequested?.name} and can offer ${exchange.skillOffered?.name} in return.`}
+                            />
+                          )}
+                        </>
                       )}
 
                       {exchange.status === 'accepted' && isProvider(exchange) && (
-                        <Button 
-                          variant="outlined" 
-                          color="error"
-                          size="small"
-                          onClick={() => handleAction(exchange._id, 'cancel')}
-                        >
-                          <Cancel sx={{ mr: 1 }} /> Cancel
-                        </Button>
+                        <>
+                          <Button 
+                            variant="outlined" 
+                            color="error"
+                            size="small"
+                            onClick={() => handleAction(exchange._id, 'cancel')}
+                          >
+                            <Cancel sx={{ mr: 1 }} /> Cancel
+                          </Button>
+                          {exchange.requester?.phoneNumber && (
+                            <WhatsAppButton 
+                              phoneNumber={exchange.requester.phoneNumber}
+                              message={`Hi! I've accepted your exchange request. Let's discuss the details for exchanging ${exchange.skillRequested?.name} and ${exchange.skillOffered?.name}.`}
+                            />
+                          )}
+                        </>
+                      )}
+
+                      {exchange.status === 'completed' && (
+                        <>
+                          <Button 
+                            variant="outlined" 
+                            color="secondary"
+                            size="small"
+                            onClick={() => handleOpenDialog(exchange, 'feedback')}
+                          >
+                            <Star sx={{ mr: 1 }} /> Rate & Feedback
+                          </Button>
+                          {isProvider(exchange) && exchange.requester?.phoneNumber && (
+                            <WhatsAppButton 
+                              phoneNumber={exchange.requester.phoneNumber}
+                              message="Hi! Thanks for the skill exchange. It was great working with you!"
+                            />
+                          )}
+                          {!isProvider(exchange) && exchange.provider?.phoneNumber && (
+                            <WhatsAppButton 
+                              phoneNumber={exchange.provider.phoneNumber}
+                              message="Hi! Thanks for the skill exchange. I learned a lot from you!"
+                            />
+                          )}
+                        </>
                       )}
                     </Box>
                   </Grid>

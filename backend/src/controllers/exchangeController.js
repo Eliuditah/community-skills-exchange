@@ -93,8 +93,8 @@ const createExchange = async (req, res) => {
     const populatedExchange = await Exchange.findById(exchange._id)
       .populate('skillOffered', 'name category description')
       .populate('skillRequested', 'name category description provider')
-      .populate('requester', 'name email profilePicture')
-      .populate('provider', 'name email profilePicture');
+      .populate('requester', 'name email profilePicture phoneNumber')
+      .populate('provider', 'name email profilePicture phoneNumber');
 
     res.status(201).json(populatedExchange);
   } catch (error) {
@@ -120,8 +120,8 @@ const getExchanges = async (req, res) => {
     })
     .populate('skillOffered', 'name category description')
     .populate('skillRequested', 'name category description')
-    .populate('requester', 'name email profilePicture')
-    .populate('provider', 'name email profilePicture')
+    .populate('requester', 'name email profilePicture phoneNumber')
+    .populate('provider', 'name email profilePicture phoneNumber')
     .sort({ createdAt: -1 });
 
     res.json(exchanges);
@@ -141,8 +141,8 @@ const getExchangeById = async (req, res) => {
     const exchange = await Exchange.findById(req.params.id)
       .populate('skillOffered', 'name category description level')
       .populate('skillRequested', 'name category description level')
-      .populate('requester', 'name email profilePicture')
-      .populate('provider', 'name email profilePicture');
+      .populate('requester', 'name email profilePicture phoneNumber')
+      .populate('provider', 'name email profilePicture phoneNumber');
 
     if (!exchange) {
       return res.status(404).json({ message: 'Exchange not found' });
@@ -200,8 +200,8 @@ const updateExchangeStatus = async (req, res) => {
     const populatedExchange = await Exchange.findById(exchange._id)
       .populate('skillOffered', 'name category description')
       .populate('skillRequested', 'name category description')
-      .populate('requester', 'name email profilePicture')
-      .populate('provider', 'name email profilePicture');
+      .populate('requester', 'name email profilePicture phoneNumber')
+      .populate('provider', 'name email profilePicture phoneNumber');
 
     res.json(populatedExchange);
   } catch (error) {
@@ -243,8 +243,8 @@ const acceptExchange = async (req, res) => {
     const populatedExchange = await Exchange.findById(exchange._id)
       .populate('skillOffered', 'name category description')
       .populate('skillRequested', 'name category description')
-      .populate('requester', 'name email profilePicture')
-      .populate('provider', 'name email profilePicture');
+      .populate('requester', 'name email profilePicture phoneNumber')
+      .populate('provider', 'name email profilePicture phoneNumber');
 
     res.json(populatedExchange);
   } catch (error) {
@@ -287,8 +287,8 @@ const completeExchange = async (req, res) => {
     const populatedExchange = await Exchange.findById(exchange._id)
       .populate('skillOffered', 'name category description')
       .populate('skillRequested', 'name category description')
-      .populate('requester', 'name email profilePicture')
-      .populate('provider', 'name email profilePicture');
+      .populate('requester', 'name email profilePicture phoneNumber')
+      .populate('provider', 'name email profilePicture phoneNumber');
 
     res.json(populatedExchange);
   } catch (error) {
@@ -331,8 +331,8 @@ const cancelExchange = async (req, res) => {
     const populatedExchange = await Exchange.findById(exchange._id)
       .populate('skillOffered', 'name category description')
       .populate('skillRequested', 'name category description')
-      .populate('requester', 'name email profilePicture')
-      .populate('provider', 'name email profilePicture');
+      .populate('requester', 'name email profilePicture phoneNumber')
+      .populate('provider', 'name email profilePicture phoneNumber');
 
     res.json(populatedExchange);
   } catch (error) {
@@ -358,8 +358,8 @@ const getUserExchanges = async (req, res) => {
     })
     .populate('skillOffered', 'name category description')
     .populate('skillRequested', 'name category description')
-    .populate('requester', 'name email profilePicture')
-    .populate('provider', 'name email profilePicture')
+    .populate('requester', 'name email profilePicture phoneNumber')
+    .populate('provider', 'name email profilePicture phoneNumber')
     .sort({ createdAt: -1 });
 
     res.json(exchanges);

@@ -33,6 +33,10 @@ const UserSchema = new mongoose.Schema({
     city: { type: String, default: '' },
     country: { type: String, default: '' }
   },
+  phoneNumber: {
+    type: String,
+    default: ''
+  },
   profilePicture: {
     type: String,
     default: ''
