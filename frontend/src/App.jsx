@@ -8,11 +8,17 @@ import Explore from './pages/Explore';
 import PostSkill from './pages/PostSkill';
 import Profile from './pages/Profile';
 import Layout from './components/Layout';
+import { useAuth } from './context/AuthContext';
 
 // Protected Route Component
 const PrivateRoute = ({ children }) => {
-  const token = localStorage.getItem('token');
-  return token ? children : <Navigate to="/login" />;
+  const { user, loading } = useAuth();
+  
+  if (loading) {
+    return <div>Loading...</div>; // or a loading spinner
+  }
+  
+  return user ? children : <Navigate to="/login" />;
 };
 
 function App() {
