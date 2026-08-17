@@ -32,11 +32,13 @@ const Dashboard = () => {
     }
   }, [user]);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   const fetchExchanges = async () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/exchanges/user', {
+      const response = await axios.get(`${API_URL}/exchanges/user`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setExchanges(response.data);
@@ -52,7 +54,7 @@ const Dashboard = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
-        `http://localhost:5000/api/exchanges/${exchangeId}/${action}`,
+        `${API_URL}/exchanges/${exchangeId}/${action}`,
         {},
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
@@ -95,7 +97,7 @@ const Dashboard = () => {
       // In a real app, you'd have a dedicated feedback endpoint
       // For now, we'll just update the exchange with the feedback
       const response = await axios.put(
-        `http://localhost:5000/api/exchanges/${selectedExchange._id}/complete`,
+        `${API_URL}/exchanges/${selectedExchange._id}/complete`,
         { 
           rating: feedbackData.rating,
           feedback: feedbackData.feedback 
@@ -144,7 +146,8 @@ const Dashboard = () => {
   };
 
   const getFilteredExchanges = () => {
-    const statuses = ['pending', 'accepted', 'ongoing', 'completed', 'cancelled'];
+    // Tab 0 = All, Tab 1 = Pending, Tab 2 = Accepted, Tab 3 = Ongoing, Tab 4 = Completed, Tab 5 = Cancelled
+    const statuses = [null, 'pending', 'accepted', 'ongoing', 'completed', 'cancelled'];
     const currentStatus = statuses[tabValue];
     if (tabValue === 0) return exchanges;
     return exchanges.filter(ex => ex.status === currentStatus);

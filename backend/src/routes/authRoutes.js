@@ -195,4 +195,76 @@ router.put('/profile', async (req, res) => {
   }
 });
 
+// Forgot Password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email?.toLowerCase().trim() });
+
+    if (!user) {
+      // Don't reveal if user exists
+      return res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
+    }
+
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+        const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+        await transporter.sendMail({
+          from: `"SkillExchange" <${process.env.EMAIL_USER}>`,
+          to: user.email,
+          subject: 'Password Reset Request',
+          html: `<p>You requested a password reset.</p><p><a href="${resetURL}">Click here to reset your password</a></p><p>This link expires in 1 hour.</p>`
+        });
+      } catch (emailErr) {
+        console.error('Email error:', emailErr);
+      }
+    }
+
+    res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch (error) {
+    console.error('❌ Forgot password error:', error);
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
+});
+
+// Reset Password
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Token invalid or expired' });
+    }
+
+    const { password } = req.body;
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully! You can now login.' });
+  } catch (error) {
+    console.error('❌ Reset password error:', error);
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
+});
 module.exports = router;

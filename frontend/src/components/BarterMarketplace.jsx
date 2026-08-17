@@ -21,10 +21,12 @@ const BarterMarketplace = () => {
     fetchSkills();
   }, []);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   const fetchSkills = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:5000/api/skills', {
+      const response = await axios.get(`${API_URL}/skills`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
       setSkills(response.data || []);
@@ -54,8 +56,7 @@ const BarterMarketplace = () => {
           message: `Barter offer: ${proposedSkills.map(s => s.name).join(', ')} for ${selectedSkills.map(s => s.name).join(', ')}`
         };
         
-        // ✅ SENDING THIS WILL NOW AUTOMATICALLY TRIGGER AN EMAIL ON THE BACKEND
-        await axios.post('http://localhost:5000/api/exchanges', exchangeData, {
+        await axios.post(`${API_URL}/exchanges`, exchangeData, {
           headers: { 'Authorization': `Bearer ${token}` }
         });
       }
@@ -70,7 +71,7 @@ const BarterMarketplace = () => {
 
   const toggleSkillSelection = (skill) => {
     setSelectedSkills(prev => 
-      prev.includes(skill) ? prev.filter(s => s._id !== skill._id) : [...prev, skill]
+      prev.some(s => s._id === skill._id) ? prev.filter(s => s._id !== skill._id) : [...prev, skill]
     );
   };
 
@@ -115,14 +116,14 @@ const BarterMarketplace = () => {
                       p: 1.5, 
                       border: '1px solid #e0e0e0', 
                       borderRadius: 1,
-                      bgcolor: selectedSkills.includes(skill) ? '#e3f2fd' : 'white',
+                      bgcolor: selectedSkills.some(s => s._id === skill._id) ? '#e3f2fd' : 'white',
                       cursor: 'pointer',
                       '&:hover': { bgcolor: '#f5f5f5' }
                     }}
                     onClick={() => toggleSkillSelection(skill)}
                     >
                       <FormControlLabel
-                        control={<Checkbox checked={selectedSkills.includes(skill)} />}
+                        control={<Checkbox checked={selectedSkills.some(s => s._id === skill._id)} />}
                         label={
                           <Box>
                             <Typography variant="body2" fontWeight="bold">{skill.name}</Typography>
@@ -149,18 +150,18 @@ const BarterMarketplace = () => {
                       p: 1.5, 
                       border: '1px solid #e0e0e0', 
                       borderRadius: 1,
-                      bgcolor: proposedSkills.includes(skill) ? '#e8f5e9' : 'white',
+                      bgcolor: proposedSkills.some(s => s._id === skill._id) ? '#e8f5e9' : 'white',
                       cursor: 'pointer',
                       '&:hover': { bgcolor: '#f5f5f5' }
                     }}
                     onClick={() => {
                       setProposedSkills(prev => 
-                        prev.includes(skill) ? prev.filter(s => s._id !== skill._id) : [...prev, skill]
+                        prev.some(s => s._id === skill._id) ? prev.filter(s => s._id !== skill._id) : [...prev, skill]
                       );
                     }}
                     >
                       <FormControlLabel
-                        control={<Checkbox checked={proposedSkills.includes(skill)} />}
+                        control={<Checkbox checked={proposedSkills.some(s => s._id === skill._id)} />}
                         label={
                           <Box>
                             <Typography variant="body2" fontWeight="bold">{skill.name}</Typography>

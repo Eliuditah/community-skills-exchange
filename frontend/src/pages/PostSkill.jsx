@@ -116,14 +116,15 @@ const PostSkill = () => {
         level: formData.level,
         tags: tags,
         image: formData.image || '',
-        userId: userData._id || userData.id // Send user ID as fallback
+        userId: user._id || user.id // Send user ID as fallback
       };
 
       console.log('📤 Sending skill data:', skillData);
 
       // Make API request
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
       const response = await axios.post(
-        'http://localhost:5000/api/skills',
+        `${API_URL}/skills`,
         skillData,
         { 
           headers: { 
