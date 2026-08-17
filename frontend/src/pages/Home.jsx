@@ -18,6 +18,7 @@ import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
 import Layout from '../components/Layout';
+import { useAuth } from '../context/AuthContext';
 import SmartMatch from '../components/SmartMatch';
 import SkillStreak from '../components/SkillStreak';
 import ImpactScore from '../components/ImpactScore';
@@ -189,8 +190,8 @@ const testimonials = [
 ];
 
 const Home = () => {
+  const { user } = useAuth();
   const [isMobile, setIsMobile] = useState(false);
-  const [user, setUser] = useState(null);
   const [tabValue, setTabValue] = useState(0);
   const sliderRef = useRef(null);
 
@@ -200,10 +201,6 @@ const Home = () => {
     };
     handleResize();
     window.addEventListener('resize', handleResize);
-    
-    const userData = JSON.parse(localStorage.getItem('user') || '{}');
-    setUser(userData);
-    
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 

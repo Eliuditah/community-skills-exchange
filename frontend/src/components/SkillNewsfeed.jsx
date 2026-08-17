@@ -23,7 +23,8 @@ const SkillNewsfeed = () => {
   const fetchFeed = async () => {
     try {
       const token = localStorage.getItem('token');
-      const exchangesRes = await axios.get('http://localhost:5000/api/exchanges/user', {
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+      const exchangesRes = await axios.get(`${API_URL}/exchanges/user`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 

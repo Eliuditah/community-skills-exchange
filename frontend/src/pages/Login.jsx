@@ -92,6 +92,11 @@ const Login = () => {
                 Sign Up
               </Link>
             </Typography>
+            <Typography align="center" sx={{ mt: 1 }}>
+              <Link to="/forgot-password" style={{ color: '#666', fontSize: '0.875rem' }}>
+                Forgot your password?
+              </Link>
+            </Typography>
           </CardContent>
         </Card>
       </Box>

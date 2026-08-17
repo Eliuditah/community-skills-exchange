@@ -8,6 +8,8 @@ import Explore from './pages/Explore';
 import PostSkill from './pages/PostSkill';
 import Profile from './pages/Profile';
 import Layout from './components/Layout';
+import ForgotPassword from './components/ForgotPassword';
+import ResetPassword from './components/ResetPassword';
 import { useAuth } from './context/AuthContext';
 
 // Protected Route Component
@@ -15,7 +17,7 @@ const PrivateRoute = ({ children }) => {
   const { user, loading } = useAuth();
   
   if (loading) {
-    return <div>Loading...</div>; // or a loading spinner
+    return <div>Loading...</div>;
   }
   
   return user ? children : <Navigate to="/login" />;
@@ -29,6 +31,8 @@ function App() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/explore" element={<Explore />} />
+      <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password/:token" element={<ResetPassword />} />
       
       {/* Protected Routes (require login) */}
       <Route path="/post-skill" element={

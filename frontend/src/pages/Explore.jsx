@@ -33,11 +33,13 @@ const Explore = () => {
     }
   }, [user]);
 
+  const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
   const fetchSkills = async () => {
     setLoading(true);
     setError('');
     try {
-      const response = await axios.get('http://localhost:5000/api/skills');
+      const response = await axios.get(`${API_URL}/skills`);
       console.log('Skills fetched:', response.data);
       setSkills(Array.isArray(response.data) ? response.data : []);
     } catch (error) {
@@ -51,7 +53,7 @@ const Explore = () => {
 
   const fetchUserSkills = async (userId) => {
     try {
-      const response = await axios.get(`http://localhost:5000/api/skills/user/${userId}`);
+      const response = await axios.get(`${API_URL}/skills/user/${userId}`);
       setUserSkills(Array.isArray(response.data) ? response.data : []);
       if (response.data.length > 0) {
         setSelectedOfferSkill(response.data[0]._id);
@@ -138,7 +140,7 @@ const Explore = () => {
       console.log('Sending exchange request:', exchangeData);
 
       const response = await axios.post(
-        'http://localhost:5000/api/exchanges',
+        `${API_URL}/exchanges`,
         exchangeData,
         {
           headers: {

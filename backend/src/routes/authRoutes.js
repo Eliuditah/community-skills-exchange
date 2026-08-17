@@ -136,11 +136,132 @@ router.get('/me', async (req, res) => {
       bio: user.bio || '',
       location: user.location || {},
       profilePicture: user.profilePicture || '',
+      phone: user.phone || '',
       reputation: user.reputation || 0
     });
   } catch (error) {
     console.error('❌ Get user error:', error);
     res.status(401).json({ message: 'Not authorized' });
+  }
+});
+
+// Update profile (protected)
+router.put('/profile', async (req, res) => {
+  try {
+    const token = req.headers.authorization?.split(' ')[1];
+    if (!token) {
+      return res.status(401).json({ message: 'Not authorized' });
+    }
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findById(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    const { name, bio, location, profilePicture, phone } = req.body;
+
+    if (name) user.name = name.trim();
+    if (bio !== undefined) user.bio = bio;
+    if (location !== undefined) user.location = location;
+    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+    if (phone !== undefined) user.phone = phone;
+
+    await user.save();
+
+    res.json({
+      _id: user._id,
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      bio: user.bio || '',
+      location: user.location || {},
+      profilePicture: user.profilePicture || '',
+      phone: user.phone || '',
+      reputation: user.reputation || 0,
+      message: 'Profile updated successfully'
+    });
+  } catch (error) {
+    console.error('❌ Profile update error:', error);
+    res.status(500).json({
+      message: 'Profile update failed.',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+// Forgot Password
+router.post('/forgot-password', async (req, res) => {
+  try {
+    const { email } = req.body;
+    const user = await User.findOne({ email: email?.toLowerCase().trim() });
+
+    if (!user) {
+      // Don't reveal if user exists
+      return res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
+    }
+
+    const crypto = require('crypto');
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+    await user.save();
+
+    if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
+      try {
+        const nodemailer = require('nodemailer');
+        const transporter = nodemailer.createTransport({
+          service: 'gmail',
+          auth: { user: process.env.EMAIL_USER, pass: process.env.EMAIL_PASS }
+        });
+        const resetURL = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password/${resetToken}`;
+        await transporter.sendMail({
+          from: `"SkillExchange" <${process.env.EMAIL_USER}>`,
+          to: user.email,
+          subject: 'Password Reset Request',
+          html: `<p>You requested a password reset.</p><p><a href="${resetURL}">Click here to reset your password</a></p><p>This link expires in 1 hour.</p>`
+        });
+      } catch (emailErr) {
+        console.error('Email error:', emailErr);
+      }
+    }
+
+    res.status(200).json({ message: 'If that email exists, a reset link has been sent.' });
+  } catch (error) {
+    console.error('❌ Forgot password error:', error);
+    res.status(500).json({ message: 'Something went wrong.' });
+  }
+});
+
+// Reset Password
+router.post('/reset-password/:token', async (req, res) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() }
+    });
+
+    if (!user) {
+      return res.status(400).json({ message: 'Token invalid or expired' });
+    }
+
+    const { password } = req.body;
+    if (!password || password.length < 6) {
+      return res.status(400).json({ message: 'Password must be at least 6 characters' });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(password, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).json({ message: 'Password reset successfully! You can now login.' });
+  } catch (error) {
+    console.error('❌ Reset password error:', error);
+    res.status(500).json({ message: 'Something went wrong.' });
   }
 });
 

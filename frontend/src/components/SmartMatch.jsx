@@ -23,13 +23,15 @@ const SmartMatch = () => {
         return;
       }
 
+      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+
       // Get user's skills
-      const userSkillsRes = await axios.get(`http://localhost:5000/api/skills/user/${user._id}`, {
+      const userSkillsRes = await axios.get(`${API_URL}/skills/user/${user._id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
       // Get all skills
-      const allSkillsRes = await axios.get('http://localhost:5000/api/skills', {
+      const allSkillsRes = await axios.get(`${API_URL}/skills`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
 
