@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, TextField, Button, Typography, Alert, Box } from '@mui/material';
 import { Login as LoginIcon } from '@mui/icons-material';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -21,12 +22,14 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await axios.post('http://localhost:5000/api/auth/login', formData);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data));
-      navigate('/dashboard');
+      const result = await login(formData.email, formData.password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Login failed. Please try again.');
+      setError('Login failed. Please try again.');
     } finally {
       setLoading(false);
     }

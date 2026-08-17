@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Card, CardContent, TextField, Button, Typography, Alert, Box, MenuItem } from '@mui/material';
 import { PersonAdd as PersonAddIcon } from '@mui/icons-material';
-import axios from 'axios';
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 
 const Register = () => {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -34,12 +35,14 @@ const Register = () => {
 
     try {
       const { confirmPassword, ...registerData } = formData;
-      const res = await axios.post('http://localhost:5000/api/auth/register', registerData);
-      localStorage.setItem('token', res.data.token);
-      localStorage.setItem('user', JSON.stringify(res.data));
-      navigate('/dashboard');
+      const result = await register(registerData);
+      if (result.success) {
+        navigate('/dashboard');
+      } else {
+        setError(result.error);
+      }
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed. Please try again.');
+      setError('Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
